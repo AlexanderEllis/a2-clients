@@ -22,6 +22,72 @@
 
 #define BUFSIZE 1024
 #define SERVER_PORT 9000
+#define SERVER_ID "Server"
+
+struct __attribute__((__packed__)) Message {
+  unsigned short type;
+  char source[20];
+  char destination[20];
+  unsigned int length;
+  unsigned int message_id;
+  char data[400];
+};
+
+struct Message get_list_message(char * client_id) {
+  struct Message message;
+  message.type = 3;
+  bzero(message.source, 20);
+  strcpy(message.source, client_id);
+  bzero(message.destination, 20);
+  strcpy(message.destination, SERVER_ID);
+  message.length = 0;
+  message.message_id = 0;
+
+  return message;
+}
+
+struct Message get_chat_message(char * client_id, char * destination, char * message_text) {
+  struct Message message;
+  message.type = 5;
+  bzero(message.source, 20);
+  strcpy(message.source, client_id);
+  bzero(message.destination, 20);
+  strcpy(message.destination, destination);
+  message.length = 10;
+  message.message_id = 0;
+  bzero(message.data, 20);
+  strcpy(message.data, message_text);
+
+
+  return message;
+}
+
+struct Message get_exit_message(char * client_id) {
+  struct Message message;
+  message.type = 6;
+  bzero(message.source, 20);
+  strcpy(message.source, client_id);
+  bzero(message.destination, 20);
+  strcpy(message.destination, SERVER_ID);
+  message.length = 0;
+  message.message_id = 0;
+
+  return message;
+}
+
+int write_message(int file_descriptor, struct Message * message) {
+  int message_byte_size =
+      write(file_descriptor, message, sizeof((*message)));
+  if (message_byte_size < 0) {
+    perror("write");
+    exit(EXIT_FAILURE);
+  } else {
+    printf("MEssage written\n");
+    printf("bytes written: %d\n", message_byte_size);
+  }
+
+  return message_byte_size;
+}
 
 int main() {
   // Create socket
@@ -51,21 +117,60 @@ int main() {
   }
 
   int message_byte_size;
-  // Start with super basic GET message
-  char * message =
-      "GET /alex/index.html HTTP/1.1\r\n"
-      "Host: 127.0.0.1\r\n";
 
+  char client_id[20];
+  printf("Enter client id: ");
+  scanf("%s", client_id);
+
+  // Start with hello.
+  struct Message hello_message;
+  hello_message.type = 1;
+  bzero(hello_message.source, 20);
+  strcpy(hello_message.source, client_id);
+  bzero(hello_message.destination, 20);
+  strcpy(hello_message.destination, "Server");
+  hello_message.length = 0;
+  hello_message.message_id = 0;
+
+  printf("Writing hello.\n");
   // Write to proxy
-  message_byte_size = write(socket_file_descriptor, message, strlen(message));
-  if (message_byte_size < 0) {
-    perror("write");
-    exit(EXIT_FAILURE);
+  message_byte_size = write_message(socket_file_descriptor, &hello_message);
+
+  while (1) {
+    printf("What would you like to do? Enter 'list', 'chat', or 'exit'.\n");
+    char command[20];
+    printf("Enter command: ");
+    scanf("%s", command);
+
+    if (strcmp(command, "list") == 0) {
+      // Send a list command
+      struct Message list_message = get_list_message(client_id);
+      message_byte_size = write_message(socket_file_descriptor, &list_message);
+    } else if (strcmp(command, "chat") == 0) {
+      char destination[20];
+      printf("Who to send to?: ");
+      scanf("%s", destination);
+      char message_text[400];
+      printf("What do you want to say?: ");
+      scanf("%s", message_text);
+      struct Message chat_message =
+          get_chat_message(client_id, destination, message_text);
+      printf("MEssage data: %s\n", chat_message.data);
+      message_byte_size = write_message(socket_file_descriptor, &chat_message);
+    } else if (strcmp(command, "exit") == 0) {
+      struct Message exit_message = get_exit_message(client_id);
+      message_byte_size = write_message(socket_file_descriptor, &exit_message);
+      break;
+    } else {
+      printf("Sorry, didn't get that.\n\n");
+    }
+
   }
 
   // Read from proxy
   char buffer[BUFSIZE];
   bzero(buffer, BUFSIZE);
+  printf("Gonna try to read\n");
   message_byte_size = read(socket_file_descriptor, buffer, BUFSIZE);
   if (message_byte_size < 0) {
     perror("read");

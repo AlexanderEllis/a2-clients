@@ -3,7 +3,21 @@
  * ask for a clientID from the command line, then initiate a
  * HELLO with the server.
  *
- * It takes two command line args: the ClientID to use and the server port.
+ * I think I'm gonna have it take a few args. It would be rad if we had
+ * a general client we could pass stuff to.
+ *
+ *
+ * Client roles:
+ * 1: Client that sends HELLO, reads HELLO_ACK and CLIENT_LIST, sends
+ *    CLIENT_LIST_REQ, readds client list, then sends EXIT
+ * 2: Client that sends HELLO, sends CHAT, then sends EXIT.
+ * 3: Client that sends HELLO, reads message, then sends EXIT.
+ *    Can be used in coordination with client 2, if you run this one before 2.
+ *    Different client ID than the one before.
+ * 4. Client that sends HELLO, 1/2 of CHAT, waits two seconds, then the other
+ *    half of CHAT, then EXIT.
+ * 5.
+ *
  *
  * To use:
  * ./client 9010
@@ -136,35 +150,56 @@ int main() {
   // Write to proxy
   message_byte_size = write_message(socket_file_descriptor, &hello_message);
 
+  fd_set readfds;
+  int fd_stdin = fileno(stdin);
+
+  FD_ZERO(&readfds);
+  FD_SET(fileno(stdin), &readfds);
+  FD_SET(socket_file_descriptor, &readfds);
+
+  struct timeval tv;
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
+
+
   while (1) {
-    printf("What would you like to do? Enter 'list', 'chat', or 'exit'.\n");
-    char command[20];
-    printf("Enter command: ");
-    scanf("%s", command);
+    int num_readable =
+        select(fd_stdin + socket_file_descriptor, &readfds, NULL, NULL, &tv);
+    if (num_readable == 2) {
+      // Get message from server first
+    } else if (num_readable == 1) {
+      if (FD_ISSET(socket_file_descriptor, &readfds)) {
+        } else {
+          printf("What would you like to do? Enter 'list', 'chat', or 'exit'.\n");
+          char command[20];
+          printf("Enter command: ");
+          scanf("%s", command);
 
-    if (strcmp(command, "list") == 0) {
-      // Send a list command
-      struct Message list_message = get_list_message(client_id);
-      message_byte_size = write_message(socket_file_descriptor, &list_message);
-    } else if (strcmp(command, "chat") == 0) {
-      char destination[20];
-      printf("Who to send to?: ");
-      scanf("%s", destination);
-      char message_text[400];
-      printf("What do you want to say?: ");
-      scanf("%s", message_text);
-      struct Message chat_message =
-          get_chat_message(client_id, destination, message_text);
-      printf("MEssage data: %s\n", chat_message.data);
-      message_byte_size = write_message(socket_file_descriptor, &chat_message);
-    } else if (strcmp(command, "exit") == 0) {
-      struct Message exit_message = get_exit_message(client_id);
-      message_byte_size = write_message(socket_file_descriptor, &exit_message);
-      break;
-    } else {
-      printf("Sorry, didn't get that.\n\n");
+          if (strcmp(command, "list") == 0) {
+            // Send a list command
+            struct Message list_message = get_list_message(client_id);
+            message_byte_size = write_message(socket_file_descriptor, &list_message);
+          } else if (strcmp(command, "chat") == 0) {
+            char destination[20];
+            printf("Who to send to?: ");
+            scanf("%s", destination);
+            char message_text[400];
+            printf("What do you want to say?: ");
+            scanf("%s", message_text);
+            struct Message chat_message =
+                get_chat_message(client_id, destination, message_text);
+            printf("MEssage data: %s\n", chat_message.data);
+            message_byte_size = write_message(socket_file_descriptor, &chat_message);
+          } else if (strcmp(command, "exit") == 0) {
+            struct Message exit_message = get_exit_message(client_id);
+            message_byte_size = write_message(socket_file_descriptor, &exit_message);
+            break;
+          } else {
+            printf("Sorry, didn't get that.\n\n");
+          }
+        }
+      }
     }
-
   }
 
   // Read from proxy

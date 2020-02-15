@@ -180,6 +180,11 @@ void convert_message_ntoh(struct Message * ptr_to_message) {
   ptr_to_message->message_id = ntohl(ptr_to_message->message_id);  // Unsigned int
 }
 
+
+/**
+ * Writes a message to the given file descriptor. Handles converting to network
+ * ordering.
+ */
 int write_message(int file_descriptor, struct Message * ptr_to_message) {
   convert_message_hton(ptr_to_message);
   int message_byte_size =

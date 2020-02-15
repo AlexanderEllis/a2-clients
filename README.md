@@ -1,6 +1,6 @@
 Part of the testing is using multiple clients that do a handful of different things. I started with a general client that would do everything, but it got busy quick. We can break it down into multiple clients.
 
-All these clients share a ton of code but doesn't really matter. More important that these all are easy to write quickly because the server takes forever.
+All these clients share a ton of code in helpers.c. I put as much as I could in there to keep each one simple.
 
 ## Clients:
 
@@ -30,8 +30,10 @@ Client 7: Client that sends HELLO, then CHAT to clientID that is not connected, 
 Client 8: Client that sends HELLO, then CHAT to itself, then reads the error message.
 - This will test the server's ability to gracefully handle a client sending a message to themself. Should probably send error message.
 
+TODO
 Client 9: Client that sends HELLO, then CHAT with data length that doesn't match length specified in header. It will then ensure that the connection was closed.
 - This will test the server's ability to handle malformed data gracefully, since the server should close the connection.
 
+TODO
 Client 10: Client that sends HELLO, then closes the connection without sending anything (very rude).
 - This will test the server's ability to handle a client randomly closing.

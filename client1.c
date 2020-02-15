@@ -108,22 +108,26 @@ void print_binary(char * buffer, int size_to_read, char * what_we_are_printing) 
   printf("\n");
 }
 
+/**
+ * Translate to network order (big endian). We have to do this when writing.
+ */
 void convert_message_hton(struct Message * ptr_to_message) {
-  // Translate to network order (big endian).
-  ptr_to_message->type = ntohs(ptr_to_message->type);  // Unsigned short
-  ptr_to_message->length = ntohl(ptr_to_message->length);  // Unsigned int
-  ptr_to_message->message_id = ntohl(ptr_to_message->message_id);  // Unsigned int
+  ptr_to_message->type = htons(ptr_to_message->type);  // Unsigned short
+  ptr_to_message->length = htonl(ptr_to_message->length);  // Unsigned int
+  ptr_to_message->message_id = htonl(ptr_to_message->message_id);  // Unsigned int
 }
 
+/**
+ * Translate from network order (big endian). Done when reading.
+ */
 void convert_message_ntoh(struct Message * ptr_to_message) {
-  // Translate from network order (big endian).
   ptr_to_message->type = ntohs(ptr_to_message->type);  // Unsigned short
   ptr_to_message->length = ntohl(ptr_to_message->length);  // Unsigned int
   ptr_to_message->message_id = ntohl(ptr_to_message->message_id);  // Unsigned int
 }
 
 int write_message(int file_descriptor, struct Message * ptr_to_message) {
-  convert_message_ntoh(ptr_to_message);
+  convert_message_hton(ptr_to_message);
   int message_byte_size =
       write(file_descriptor, ptr_to_message, sizeof((*ptr_to_message)));
   if (message_byte_size < 0) {
@@ -216,7 +220,7 @@ int main() {
   struct Message hello_ack_message;
   memcpy(&hello_ack_message, buffer, message_byte_size);
   DEBUG_PRINT("hello_ack_type: %d\n", hello_ack_message.type);
-  convert_message_hton(&hello_ack_message);
+  convert_message_ntoh(&hello_ack_message);
   print_message(&hello_ack_message);
 
   assert(hello_ack_message.type == 2); // HELLO_ACK
@@ -241,7 +245,7 @@ int main() {
   DEBUG_PRINT("client_list type: %d\n", client_list_message.type);
   DEBUG_PRINT("client_list length: %d\n", client_list_message.length);
   DEBUG_PRINT("client_list message_id: %d\n", client_list_message.message_id);
-  convert_message_hton(&client_list_message);
+  convert_message_ntoh(&client_list_message);
   print_message(&client_list_message);
   assert(client_list_message.type == 4); // CLIENT_LIST
   assert(client_list_message.length != 0); // Length should be nonzero
@@ -262,7 +266,7 @@ int main() {
     exit(EXIT_FAILURE);
   }
   memcpy(&client_list_message, buffer, message_byte_size);
-  convert_message_hton(&client_list_message);
+  convert_message_ntoh(&client_list_message);
   print_message(&client_list_message);
   assert(client_list_message.type == 4); // CLIENT_LIST
 

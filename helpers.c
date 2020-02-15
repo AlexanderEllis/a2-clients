@@ -43,7 +43,6 @@ int connect_to_server() {
     perror("socket");
     exit(EXIT_FAILURE);
   }
-
   // Build proxy address
   struct sockaddr_in server_address;
   bzero((char *) &server_address, sizeof(server_address));
@@ -71,6 +70,19 @@ struct Message get_hello_message(char * client_id) {
   strcpy(message.source, client_id);
   bzero(message.destination, 20);
   strcpy(message.destination, SERVER_ID);
+  message.length = 0;
+  message.message_id = 0;
+
+  return message;
+}
+
+struct Message get_list_req_message(char * source, char * destination) {
+  struct Message message;
+  message.type = 3;
+  bzero(message.source, 20);
+  strcpy(message.source, source);
+  bzero(message.destination, 20);
+  strcpy(message.destination, destination);
   message.length = 0;
   message.message_id = 0;
 
@@ -106,9 +118,11 @@ struct Message get_exit_message(char * source, char * destination) {
 }
 
 /**
- * Prints a buffer in bytes.
+ * Prints a buffer in bytes. Not safe about sizes and it'll just print whatever
+ * you ask it to, so be careful.
  *
- * This is some rainman shit to verify endianness.
+ * I had to use this for debugging unfortunately, but it was useful to figure
+ * out I had a typo when converting network-order to host-order and vice-versa.
  */
 void print_binary(char * buffer, int size_to_read, char * what_we_are_printing) {
   DEBUG_PRINT("Printing %s in binary.\n", what_we_are_printing);

@@ -1,6 +1,6 @@
 Part of the testing is using multiple clients that do a handful of different things. I started with a general client that would do everything, but it got busy quick. We can break it down into multiple clients.
 
-All these clients share a ton of code but whatever.
+All these clients share a ton of code but doesn't really matter. More important that these all are easy to write quickly because the server takes forever.
 
 ## Clients:
 
@@ -10,7 +10,7 @@ Client 1: Client that sends HELLO, reads HELLO_ACK and CLIENT_LIST, sends CLIENT
 Client 2: Client that sends HELLO, sends CHAT, then sends EXIT.
 
 Client 3: Client that sends HELLO, reads message, then sends EXIT.
-- Can be used in coordination with client 2, if you run this one before 2.
+- Can be used in coordination with client 2, if you run this one first.
 - Different client ID than the one before.
 
 Client 4: Client that sends HELLO, 1/2 of CHAT, waits two seconds, then the other half of CHAT, then EXIT.

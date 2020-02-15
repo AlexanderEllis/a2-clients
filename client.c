@@ -72,7 +72,6 @@ struct Message get_chat_message(char * client_id, char * destination, char * mes
   bzero(message.data, 20);
   strcpy(message.data, message_text);
 
-
   return message;
 }
 

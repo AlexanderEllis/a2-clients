@@ -93,10 +93,29 @@ struct Message get_exit_message() {
   return message;
 }
 
-int write_message(int file_descriptor, struct Message * message) {
-  DEBUG_PRINT("sizeof message: %lu\n", sizeof((*message)));
+/**
+ * Translate to network order (big endian). We have to do this when writing.
+ */
+void convert_message_hton(struct Message * ptr_to_message) {
+  ptr_to_message->type = htons(ptr_to_message->type);  // Unsigned short
+  ptr_to_message->length = htonl(ptr_to_message->length);  // Unsigned int
+  ptr_to_message->message_id = htonl(ptr_to_message->message_id);  // Unsigned int
+}
+
+/**
+ * Translate from network order (big endian). Done when reading.
+ */
+void convert_message_ntoh(struct Message * ptr_to_message) {
+  ptr_to_message->type = ntohs(ptr_to_message->type);  // Unsigned short
+  ptr_to_message->length = ntohl(ptr_to_message->length);  // Unsigned int
+  ptr_to_message->message_id = ntohl(ptr_to_message->message_id);  // Unsigned int
+}
+
+int write_message(int file_descriptor, struct Message * ptr_to_message) {
+  DEBUG_PRINT("sizeof message: %lu\n", sizeof((*ptr_to_message)));
+  convert_message_hton(ptr_to_message);
   int message_byte_size =
-      write(file_descriptor, message, sizeof((*message)));
+      write(file_descriptor, ptr_to_message, sizeof((*ptr_to_message)));
   if (message_byte_size < 0) {
     perror("write");
     exit(EXIT_FAILURE);
@@ -105,6 +124,24 @@ int write_message(int file_descriptor, struct Message * message) {
     DEBUG_PRINT("bytes written: %d\n", message_byte_size);
   }
 
+  return message_byte_size;
+}
+
+/**
+ * Reads a full message into the message pointed to by ptr_to_message.
+ */
+int read_message(int file_descriptor, struct Message * ptr_to_message) {
+  char buffer[MESSAGE_MAX_SIZE];
+  bzero(buffer, MESSAGE_MAX_SIZE);
+  DEBUG_PRINT("Gonna try to read\n");
+  int message_byte_size = read(file_descriptor, buffer, MESSAGE_MAX_SIZE);
+  DEBUG_PRINT("Read %d bytes\n", message_byte_size);
+  if (message_byte_size < 0) {
+    perror("read");
+    exit(EXIT_FAILURE);
+  }
+  memcpy(ptr_to_message, buffer, message_byte_size);
+  convert_message_ntoh(ptr_to_message);
   return message_byte_size;
 }
 
@@ -175,28 +212,13 @@ int main() {
   message_byte_size = write_message(socket_file_descriptor, &hello_message);
 
   // Read from server. We should get a HELLO_ACK.
-  char buffer[MESSAGE_MAX_SIZE];
-  bzero(buffer, MESSAGE_MAX_SIZE);
-  DEBUG_PRINT("Gonna try to read\n");
-  message_byte_size = read(socket_file_descriptor, buffer, MESSAGE_MAX_SIZE);
-  if (message_byte_size < 0) {
-    perror("read");
-    exit(EXIT_FAILURE);
-  }
   struct Message hello_ack_message;
-  memcpy(&hello_ack_message, buffer, message_byte_size);
+  read_message(socket_file_descriptor, &hello_ack_message);
   print_message(&hello_ack_message);
 
   // Read from server. We should get a CLIENT_LIST.
-  bzero(buffer, MESSAGE_MAX_SIZE);
-  DEBUG_PRINT("Gonna try to read\n");
-  message_byte_size = read(socket_file_descriptor, buffer, MESSAGE_MAX_SIZE);
-  if (message_byte_size < 0) {
-    perror("read");
-    exit(EXIT_FAILURE);
-  }
   struct Message client_list_message;
-  memcpy(&client_list_message, buffer, message_byte_size);
+  read_message(socket_file_descriptor, &client_list_message);
   print_message(&client_list_message);
 
   // Let's chat it up.

@@ -141,6 +141,9 @@ int write_message(int file_descriptor, struct Message * ptr_to_message) {
   return message_byte_size;
 }
 
+/**
+ * Reads a full message into the message pointed to by ptr_to_message.
+ */
 int read_message(int file_descriptor, struct Message * ptr_to_message) {
   char buffer[MESSAGE_MAX_SIZE];
   bzero(buffer, MESSAGE_MAX_SIZE);

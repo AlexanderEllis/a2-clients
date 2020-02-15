@@ -13,9 +13,11 @@ Client 3: Client that sends HELLO, reads message, then sends EXIT.
 - Can be used in coordination with client 2, if you run this one first.
 - Different client ID than the one before.
 
+TODO
 Client 4: Client that sends HELLO, 1/2 of CHAT, waits two seconds, then the other half of CHAT, then EXIT.
 - This will test the partial message
 
+TODO
 Client 5: Client that sends HELLO, 1/2 of CHAT, waits 61 seconds, then ensures connection was closed.
 - This will test the server's timeout when waiting for partial messages. After a minute the connection should be closed.
 

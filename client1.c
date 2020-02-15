@@ -18,6 +18,7 @@
  * gcc -g -o client1 client1.c
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -91,9 +92,40 @@ struct Message get_exit_message() {
   return message;
 }
 
-int write_message(int file_descriptor, struct Message * message) {
+/**
+ * Prints a buffer in bytes.
+ *
+ * This is some rainman shit to verify endianness.
+ */
+void print_binary(char * buffer, int size_to_read, char * what_we_are_printing) {
+  DEBUG_PRINT("Printing %s in binary.\n", what_we_are_printing);
+  for (int i = 0; i < size_to_read; i++) {
+    for (int j = 0; j < 8; j++) {
+      printf("%d", !!((buffer[i] << j) & 0x80));
+    }
+    printf(" ");
+  }
+  printf("\n");
+}
+
+void convert_message_hton(struct Message * ptr_to_message) {
+  // Translate to network order (big endian).
+  ptr_to_message->type = ntohs(ptr_to_message->type);  // Unsigned short
+  ptr_to_message->length = ntohl(ptr_to_message->length);  // Unsigned int
+  ptr_to_message->message_id = ntohl(ptr_to_message->message_id);  // Unsigned int
+}
+
+void convert_message_ntoh(struct Message * ptr_to_message) {
+  // Translate from network order (big endian).
+  ptr_to_message->type = ntohs(ptr_to_message->type);  // Unsigned short
+  ptr_to_message->length = ntohl(ptr_to_message->length);  // Unsigned int
+  ptr_to_message->message_id = ntohl(ptr_to_message->message_id);  // Unsigned int
+}
+
+int write_message(int file_descriptor, struct Message * ptr_to_message) {
+  convert_message_ntoh(ptr_to_message);
   int message_byte_size =
-      write(file_descriptor, message, sizeof((*message)));
+      write(file_descriptor, ptr_to_message, sizeof((*ptr_to_message)));
   if (message_byte_size < 0) {
     perror("write");
     exit(EXIT_FAILURE);
@@ -172,29 +204,47 @@ int main() {
   message_byte_size = write_message(socket_file_descriptor, &hello_message);
 
   // Read from server. We should get a HELLO_ACK.
+  DEBUG_PRINT("Gonna try to read\n");
   char buffer[MESSAGE_MAX_SIZE];
   bzero(buffer, MESSAGE_MAX_SIZE);
-  DEBUG_PRINT("Gonna try to read\n");
   message_byte_size = read(socket_file_descriptor, buffer, MESSAGE_MAX_SIZE);
+  DEBUG_PRINT("Read %d bytes\n", message_byte_size);
   if (message_byte_size < 0) {
     perror("read");
     exit(EXIT_FAILURE);
   }
   struct Message hello_ack_message;
   memcpy(&hello_ack_message, buffer, message_byte_size);
+  DEBUG_PRINT("hello_ack_type: %d\n", hello_ack_message.type);
+  convert_message_hton(&hello_ack_message);
   print_message(&hello_ack_message);
+
+  assert(hello_ack_message.type == 2); // HELLO_ACK
+  assert(hello_ack_message.length == 0); // Length should be zero
 
   // Read from server. We should get a CLIENT_LIST.
   bzero(buffer, MESSAGE_MAX_SIZE);
   DEBUG_PRINT("Gonna try to read\n");
   message_byte_size = read(socket_file_descriptor, buffer, MESSAGE_MAX_SIZE);
+  DEBUG_PRINT("Read %d bytes\n", message_byte_size);
+  // Print first two bytes
+  print_binary(buffer, 2, "client_list type before converting");
+  print_binary(buffer + 2 + 40, 4, "client_list length before converting");
+  print_binary(buffer + 2 + 44, 4, "client_list message_id before converting");
+  DEBUG_PRINT("Read %d bytes\n", message_byte_size);
   if (message_byte_size < 0) {
     perror("read");
     exit(EXIT_FAILURE);
   }
   struct Message client_list_message;
   memcpy(&client_list_message, buffer, message_byte_size);
+  DEBUG_PRINT("client_list type: %d\n", client_list_message.type);
+  DEBUG_PRINT("client_list length: %d\n", client_list_message.length);
+  DEBUG_PRINT("client_list message_id: %d\n", client_list_message.message_id);
+  convert_message_hton(&client_list_message);
   print_message(&client_list_message);
+  assert(client_list_message.type == 4); // CLIENT_LIST
+  assert(client_list_message.length != 0); // Length should be nonzero
 
   // Send another LIST_REQ because we're needy.
   struct Message list_req_message = get_list_req_message();
@@ -206,12 +256,15 @@ int main() {
   bzero(buffer, MESSAGE_MAX_SIZE);
   DEBUG_PRINT("Gonna try to read\n");
   message_byte_size = read(socket_file_descriptor, buffer, MESSAGE_MAX_SIZE);
+  DEBUG_PRINT("Read %d bytes\n", message_byte_size);
   if (message_byte_size < 0) {
     perror("read");
     exit(EXIT_FAILURE);
   }
   memcpy(&client_list_message, buffer, message_byte_size);
+  convert_message_hton(&client_list_message);
   print_message(&client_list_message);
+  assert(client_list_message.type == 4); // CLIENT_LIST
 
   // Send EXIT because we're done.
   struct Message exit_message = get_exit_message();

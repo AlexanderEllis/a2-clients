@@ -33,6 +33,16 @@
 // Message max size is 2 + 20 + 20 + 4 + 4 + 400
 #define MESSAGE_MAX_SIZE 450
 
+// DEBUG macro jacked from https://stackoverflow.com/questions/1941307/debug-print-macro-in-c
+// Super helpful because it includes fn name and line number.
+#define DEBUG 3
+#if defined(DEBUG) && DEBUG > 0
+ #define DEBUG_PRINT(fmt, args...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt, \
+    __FILE__, __LINE__, __func__, ##args)
+#else
+ #define DEBUG_PRINT(fmt, args...) /* Don't do anything in release builds */
+#endif
+
 struct __attribute__((__packed__)) Message {
   unsigned short type;
   char source[20];
@@ -88,23 +98,36 @@ int write_message(int file_descriptor, struct Message * message) {
     perror("write");
     exit(EXIT_FAILURE);
   } else {
-    printf("MEssage written\n");
-    printf("bytes written: %d\n", message_byte_size);
+    DEBUG_PRINT("Message written\n");
+    DEBUG_PRINT("bytes written: %d\n", message_byte_size);
   }
 
   return message_byte_size;
 }
 
+/**
+ * Prints the fields of a message.
+ * Note the custom printing for null bytes in the data, where it prints
+ * '\0'. I found this was super helpful for visualizing the client list, which
+ * ends up looking like 'Client1\0Client2\0'.
+ */
 void print_message(struct Message * message) {
-  printf("Printing message information.\n");
-  printf("type: '%hu'\n", message->type);
-  printf("source: '%s'\n", message->source);
-  printf("destination: '%s'\n", message->destination);
-  printf("length: '%d'\n", message->length);
-  printf("message_id: '%d'\n", message->message_id);
-  printf("data: '");
+  DEBUG_PRINT("Printing message information.\n");
+  DEBUG_PRINT("type: '%hu'\n", message->type);
+  DEBUG_PRINT("source: '%s'\n", message->source);
+  DEBUG_PRINT("destination: '%s'\n", message->destination);
+  DEBUG_PRINT("length: '%d'\n", message->length);
+  DEBUG_PRINT("message_id: '%d'\n", message->message_id);
+  DEBUG_PRINT("data: '");
+  // Don't use DEBUG_PRINT for the next two because it fucks with the terminal
+  // formatting and looks bad. We want it to be continuation from the previous
+  // debug print call.
   for (int i = 0; i < message->length; i++) {
-    printf("%c", message->data[i]);
+    if (message->data[i] == '\0') {
+      printf("\\0");
+    } else {
+      printf("%c", message->data[i]);
+    }
   }
   printf("'\n");
 }
@@ -144,14 +167,14 @@ int main() {
 
   // Start with hello.
   struct Message hello_message = get_hello_message();
-  printf("Writing hello.\n");
+  DEBUG_PRINT("Writing hello.\n");
   // Write to server.
   message_byte_size = write_message(socket_file_descriptor, &hello_message);
 
   // Read from server. We should get a HELLO_ACK.
   char buffer[MESSAGE_MAX_SIZE];
   bzero(buffer, MESSAGE_MAX_SIZE);
-  printf("Gonna try to read\n");
+  DEBUG_PRINT("Gonna try to read\n");
   message_byte_size = read(socket_file_descriptor, buffer, MESSAGE_MAX_SIZE);
   if (message_byte_size < 0) {
     perror("read");
@@ -163,7 +186,7 @@ int main() {
 
   // Read from server. We should get a CLIENT_LIST.
   bzero(buffer, MESSAGE_MAX_SIZE);
-  printf("Gonna try to read\n");
+  DEBUG_PRINT("Gonna try to read\n");
   message_byte_size = read(socket_file_descriptor, buffer, MESSAGE_MAX_SIZE);
   if (message_byte_size < 0) {
     perror("read");

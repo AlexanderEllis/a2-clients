@@ -1,5 +1,7 @@
 Part of the testing is using multiple clients that do a handful of different things. I started with a general client that would do everything, but it got busy quick. We can break it down into multiple clients.
 
+All these clients share a ton of code but whatever.
+
 ## Clients:
 
 Client 1: Client that sends HELLO, reads HELLO_ACK and CLIENT_LIST, sends CLIENT_LIST_REQ, reads client list, then sends EXIT

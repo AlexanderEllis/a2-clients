@@ -4,9 +4,7 @@
  * Confirms it got a HELLO_ACK
  * Confirms it got a CLIENT_LIST
  * Sends CHAT to a predefined client id (see Client 3).
- * Hangs out for a while.
- *
- * (See README for more details on other clients)
+ * EXITs.
  *
  * Takes in the server's port as an arg eventually.
  *
@@ -16,14 +14,6 @@
  * To build:
  * gcc -g -o client2 client2.c
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <netinet/in.h>
 
 #include "helpers.c"
 

@@ -20,15 +20,6 @@
  * gcc -g -o client7 client7.c
  */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <netinet/in.h>
-
 #include "helpers.c"
 
 #define CLIENT_ID "Client7"

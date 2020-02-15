@@ -19,7 +19,7 @@ Client 4: Client that sends HELLO, 1/2 of CHAT, waits two seconds, then the othe
 Client 5: Client that sends HELLO, 1/2 of CHAT, waits 61 seconds, then ensures connection was closed.
 - This will test the server's timeout when waiting for partial messages. After a minute the connection should be closed.
 
-Client 6: "Client" that actually creates two connections with the same client ID. First one should succeed, second one gets error message.
+Client 6: Client that sends HELLO, then tries to read, then just hangs out. Running one instance of this should succeed and print the hello_ack and clinet list. Running another instance without stopping the first one should print out the ERROR message it receives.
 - This will test the server's ERROR(CLIENT_ALREADY_PRESENT)
 
 Client 7: Client that sends HELLO, then CHAT to clientID that is not connected, then reads the error message.

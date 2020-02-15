@@ -78,11 +78,11 @@ struct Message get_list_req_message() {
   return message;
 }
 
-struct Message get_exit_message(char * client_id) {
+struct Message get_exit_message() {
   struct Message message;
   message.type = 6;
   bzero(message.source, 20);
-  strcpy(message.source, client_id);
+  strcpy(message.source, CLIENT_ID);
   bzero(message.destination, 20);
   strcpy(message.destination, SERVER_ID);
   message.length = 0;
@@ -196,7 +196,28 @@ int main() {
   memcpy(&client_list_message, buffer, message_byte_size);
   print_message(&client_list_message);
 
-  // TODO: send EXIT
+  // Send another LIST_REQ because we're needy.
+  struct Message list_req_message = get_list_req_message();
+  DEBUG_PRINT("Writing list req.\n");
+  // Write to server.
+  message_byte_size = write_message(socket_file_descriptor, &list_req_message);
+
+  // Read from server. We should get another CLIENT_LIST.
+  bzero(buffer, MESSAGE_MAX_SIZE);
+  DEBUG_PRINT("Gonna try to read\n");
+  message_byte_size = read(socket_file_descriptor, buffer, MESSAGE_MAX_SIZE);
+  if (message_byte_size < 0) {
+    perror("read");
+    exit(EXIT_FAILURE);
+  }
+  memcpy(&client_list_message, buffer, message_byte_size);
+  print_message(&client_list_message);
+
+  // Send EXIT because we're done.
+  struct Message exit_message = get_exit_message();
+  DEBUG_PRINT("Writing exit.\n");
+  // Write to server.
+  message_byte_size = write_message(socket_file_descriptor, &exit_message);
 
   // Close the active socket.
   close(socket_file_descriptor);

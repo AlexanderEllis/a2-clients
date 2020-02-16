@@ -44,7 +44,12 @@ int main() {
   while(1) {
     // Read from server. We should get a CHAT.
     struct Message chat_message;
-    read_message(socket_file_descriptor, &chat_message);
+    bzero(&chat_message, sizeof(chat_message));
+    int bytes_read = read_message(socket_file_descriptor, &chat_message);
+    if (bytes_read == 0) {
+      close(socket_file_descriptor);
+      return 0;
+    }
     print_message(&chat_message);
   }
 

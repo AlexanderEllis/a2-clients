@@ -77,6 +77,7 @@ int main() {
   int message_byte_size =
       write_partial_message(socket_file_descriptor, &hello_message, 0, 25);
   DEBUG_PRINT("Bytes written in first write: %d\n", message_byte_size);
+  sleep(2);
   message_byte_size =
       write_partial_message(socket_file_descriptor, &hello_message, 25, 25);
   DEBUG_PRINT("Bytes written in second write: %d\n", message_byte_size);
@@ -111,6 +112,7 @@ int main() {
   message_byte_size =
       write_partial_message(socket_file_descriptor, &chat_message, 0, 25);
   DEBUG_PRINT("Bytes written in first write: %d\n", message_byte_size);
+  sleep(2);
   message_byte_size =
       write_partial_message(socket_file_descriptor, &chat_message, 25, 25 + body_length);
   DEBUG_PRINT("Bytes written in second write: %d\n", message_byte_size);
@@ -131,6 +133,7 @@ int main() {
                             0,
                             HEADER_SIZE + 5); // 5 bytes of body
   DEBUG_PRINT("Bytes written in first write: %d\n", message_byte_size);
+  sleep(2);
   message_byte_size =
       write_partial_message(socket_file_descriptor,
                             &chat_message,
@@ -155,12 +158,14 @@ int main() {
                             0,
                             25);
   DEBUG_PRINT("Bytes written in first write: %d\n", message_byte_size);
+  sleep(2);
   message_byte_size =
       write_partial_message(socket_file_descriptor,
                             &chat_message,
                             25,
                             25 + 5);
   DEBUG_PRINT("Bytes written in second write: %d\n", message_byte_size);
+  sleep(2);
   message_byte_size =
       write_partial_message(socket_file_descriptor,
                             &chat_message,
@@ -183,6 +188,7 @@ int main() {
                             0,
                             HEADER_SIZE);
   DEBUG_PRINT("Bytes written in first write: %d\n", message_byte_size);
+  sleep(2);
   message_byte_size =
       write_partial_message(socket_file_descriptor,
                             &chat_message,

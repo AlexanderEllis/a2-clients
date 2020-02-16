@@ -12,6 +12,7 @@
 #define SERVER_ID "Server"
 // Message max size is 2 + 20 + 20 + 4 + 4 + 400
 #define MESSAGE_MAX_SIZE 450
+#define HEADER_SIZE 50
 
 // DEBUG macro jacked from https://stackoverflow.com/questions/1941307/debug-print-macro-in-c
 // Super helpful because it includes fn name and line number.
@@ -180,14 +181,29 @@ void convert_message_ntoh(struct Message * ptr_to_message) {
   ptr_to_message->message_id = ntohl(ptr_to_message->message_id);  // Unsigned int
 }
 
+int get_size_to_write(struct Message * ptr_to_message) {
+  if (
+    (ptr_to_message->type == 1) || // HELLO
+    (ptr_to_message->type == 3) || // LIST_REQ
+    (ptr_to_message->type == 6)    // EXIT
+  ) {
+    return HEADER_SIZE;
+  } else {
+    return HEADER_SIZE + ptr_to_message->length;
+  }
+}
+
 /**
  * Writes a message to the given file descriptor. Handles converting to network
  * ordering.
  */
 int write_message(int file_descriptor, struct Message * ptr_to_message) {
+  // Get size to write before converting endianness.
+  int size_to_write = get_size_to_write(ptr_to_message);
   convert_message_hton(ptr_to_message);
+  DEBUG_PRINT("Preparing to write %d bytes\n", size_to_write);
   int message_byte_size =
-      write(file_descriptor, ptr_to_message, sizeof((*ptr_to_message)));
+      write(file_descriptor, ptr_to_message, size_to_write);
   if (message_byte_size < 0) {
     perror("write");
     exit(EXIT_FAILURE);

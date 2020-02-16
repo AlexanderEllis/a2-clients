@@ -40,10 +40,13 @@ int main() {
   read_message(socket_file_descriptor, &client_list_message);
   print_message(&client_list_message);
 
-  // Read from server. We should get a CHAT.
-  struct Message chat_message;
-  read_message(socket_file_descriptor, &chat_message);
-  print_message(&chat_message);
+  // Loop forever
+  while(1) {
+    // Read from server. We should get a CHAT.
+    struct Message chat_message;
+    read_message(socket_file_descriptor, &chat_message);
+    print_message(&chat_message);
+  }
 
   // Close the active socket.
   close(socket_file_descriptor);

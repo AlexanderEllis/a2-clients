@@ -14,8 +14,8 @@ Client 3: Client that sends HELLO, reads message, then sends EXIT.
 - Different client ID than the one before.
 
 TODO
-Client 4: Client that sends HELLO, 1/2 of CHAT, waits two seconds, then the other half of CHAT, then EXIT.
-- This will test the partial message
+Client 4: Client that sends 1/2 of HELLO headers, then second half of HELLO headers. the 1/2 of CHAT, then second half of chat.
+- This will test the partial message for headers.
 
 TODO
 Client 5: Client that sends HELLO, 1/2 of CHAT, waits 61 seconds, then ensures connection was closed.
@@ -34,6 +34,5 @@ TODO
 Client 9: Client that sends HELLO, then CHAT with data length that doesn't match length specified in header. It will then ensure that the connection was closed.
 - This will test the server's ability to handle malformed data gracefully, since the server should close the connection.
 
-TODO
 Client 10: Client that sends HELLO, then closes the connection without sending anything (very rude).
 - This will test the server's ability to handle a client randomly closing.

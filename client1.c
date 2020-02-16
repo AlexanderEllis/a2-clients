@@ -29,6 +29,7 @@ int main() {
   // Start with hello.
   struct Message hello_message = get_hello_message(CLIENT_ID);
   DEBUG_PRINT("Writing hello.\n");
+  print_message(&hello_message);
   int message_byte_size = write_message(socket_file_descriptor, &hello_message);
 
   // Read from server. We should get a HELLO_ACK.
@@ -49,6 +50,7 @@ int main() {
   // Send another LIST_REQ because we're needy.
   struct Message list_req_message = get_list_req_message(CLIENT_ID, SERVER_ID);
   DEBUG_PRINT("Writing list req.\n");
+  print_message(&list_req_message);
   message_byte_size = write_message(socket_file_descriptor, &list_req_message);
 
   // Read from server. We should get another CLIENT_LIST.

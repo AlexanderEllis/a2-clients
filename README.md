@@ -13,7 +13,6 @@ Client 3: Client that sends HELLO, reads message, then sends EXIT.
 - Can be used in coordination with client 2, if you run this one first.
 - Different client ID than the one before.
 
-TODO
 Client 4: Client that sends 1/2 of HELLO headers, then second half of HELLO headers. the 1/2 of CHAT, then second half of chat.
 - This will test the partial message for headers.
 

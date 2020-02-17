@@ -27,10 +27,10 @@
  * Takes in the server's port as an arg eventually.
  *
  * To use:
- * ./client2 9010
+ * ./client4 9010
  *
  * To build:
- * gcc -g -o client2 client2.c
+ * gcc -g -o client4 client4.c
  */
 
 #include "helpers.c"

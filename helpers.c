@@ -223,12 +223,10 @@ int read_message(int file_descriptor, struct Message * ptr_to_message) {
   bzero(buffer, MESSAGE_MAX_SIZE);
   DEBUG_PRINT("Gonna try to read\n");
   int message_byte_size = read(file_descriptor, buffer, MESSAGE_MAX_SIZE);
-  DEBUG_PRINT("Read %d bytes\n", message_byte_size);
   // Print first two bytes
   DEBUG_PRINT("Read %d bytes\n", message_byte_size);
   if (message_byte_size < 0) {
-    perror("read");
-    exit(EXIT_FAILURE);
+    return message_byte_size;
   }
   memcpy(ptr_to_message, buffer, message_byte_size);
   convert_message_ntoh(ptr_to_message);

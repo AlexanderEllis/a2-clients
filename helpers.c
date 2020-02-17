@@ -194,6 +194,31 @@ int get_size_to_write(struct Message * ptr_to_message) {
 }
 
 /**
+ * Note different write helper than other clients since we have to write partial
+ * messages.
+ *
+ * Network-order MUST be done outside of this fn because otherwise we'll undo it
+ * when we call it again.
+ */
+int write_partial_message(int file_descriptor,
+                          struct Message * ptr_to_message,
+                          int start_offset,
+                          int size) {
+  // Get size to write before converting endianness.
+  int message_byte_size =
+      write(file_descriptor, ((char * ) ptr_to_message) + start_offset, size);
+  if (message_byte_size < 0) {
+    perror("write");
+    exit(EXIT_FAILURE);
+  } else {
+    DEBUG_PRINT("Message written\n");
+    DEBUG_PRINT("bytes written: %d\n", message_byte_size);
+  }
+
+  return message_byte_size;
+}
+
+/**
  * Writes a message to the given file descriptor. Handles converting to network
  * ordering.
  */

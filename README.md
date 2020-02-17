@@ -26,7 +26,7 @@ Client 7: Client that sends HELLO, then CHAT to clientID that is not connected, 
 - This will test a nonexistant clientID and the server's ERROR(CANNOT_DELIVER)
 
 Client 8: Client that sends HELLO, then CHAT to itself, then reads the error message.
-- This will test the server's ability to gracefully handle a client sending a message to themself. Should probably send error message.
+- This will test the server's ability to gracefully handle a client sending a message to themself. As per the handout, the socket will be closed.
 
 TODO
 Client 9: Client that sends HELLO, then CHAT with data length that doesn't match length specified in header. It will then ensure that the connection was closed.

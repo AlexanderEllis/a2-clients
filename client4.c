@@ -39,33 +39,6 @@
 #define DESTINATION_ID "Client3"
 #define MESSAGE_ID 112  // Arbitrary
 
-/**
- * Note different write helper than other clients since we have to write partial
- * messages.
- *
- * Network-order MUST be done outside of this fn because otherwise we'll undo it
- * when we call it again.
- */
-int write_partial_message(int file_descriptor,
-                          struct Message * ptr_to_message,
-                          int start_offset,
-                          int size) {
-  // Get size to write before converting endianness.
-  //DEBUG_PRINT("Pointer to message: %p\n", ptr_to_message);
-  //DEBUG_PRINT("Preparing to write %d bytes from address %p\n", size, ptr_to_message + (start_offset * sizeof(char)));
-  int message_byte_size =
-      write(file_descriptor, ((char * ) ptr_to_message) + start_offset, size);
-  if (message_byte_size < 0) {
-    perror("write");
-    exit(EXIT_FAILURE);
-  } else {
-    DEBUG_PRINT("Message written\n");
-    DEBUG_PRINT("bytes written: %d\n", message_byte_size);
-  }
-
-  return message_byte_size;
-}
-
 int main() {
   // Create socket
   int socket_file_descriptor = connect_to_server();

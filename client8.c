@@ -27,6 +27,9 @@
 #define TEST_MESSAGE_ID 112
 
 int main() {
+  // Gotta set the sigpipe ignore setting so we can get -1 back from writes.
+  // This will allow us to monitor when writes fail.
+  signal(SIGPIPE, SIG_IGN);
   // Create socket
   int socket_file_descriptor = connect_to_server();
 
@@ -40,10 +43,12 @@ int main() {
 
   // Read from server. We should get a HELLO_ACK.
   struct Message hello_ack_message;
+  DEBUG_PRINT("Reading hello ack.\n");
   read_message(socket_file_descriptor, &hello_ack_message);
   print_message(&hello_ack_message);
   // Read from server. We should get a CLIENT_LIST.
   struct Message client_list_message;
+  DEBUG_PRINT("Reading client_list.\n");
   read_message(socket_file_descriptor, &client_list_message);
   print_message(&client_list_message);
 
@@ -55,16 +60,15 @@ int main() {
                        message_data,
                        TEST_MESSAGE_ID);
   // Write to server.
+  DEBUG_PRINT("Writing chat to myself.\n");
   message_byte_size = write_message(socket_file_descriptor, &chat_message);
 
-  // Read from server. We should get a ERROR(CANNOT_DELIVER).
-  struct Message error_message;
-  read_message(socket_file_descriptor, &error_message);
-  print_message(&error_message);
-  assert(strcmp(error_message.destination, CLIENT_ID) == 0);
-  assert(strcmp(error_message.source, SERVER_ID) == 0);
-  assert(error_message.type == 8);  // Type for ERROR(CANNOT_DELIVER)
-  assert(error_message.message_id == TEST_MESSAGE_ID);
+  // Read from server. Server will have disconnected socket and removed from
+  // lists (see assignment handout).
+  struct Message message;
+  DEBUG_PRINT("Attempting to read error, but we'll get 0 bytes read.\n");
+  int bytes_read = read_message(socket_file_descriptor, &message);
+  assert(bytes_read == 0);
 
   // Loop until we kill program to ensure we're not closing this client's
   // connection.

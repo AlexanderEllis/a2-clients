@@ -34,3 +34,6 @@ Client 9: Client that sends HELLO, then CHAT with data length that doesn't match
 
 Client 10: Client that sends HELLO, then closes the connection without sending anything (very rude).
 - This will test the server's ability to handle a client randomly closing.
+
+Client 11: Client that sends a junk HELLO (bad header fields)
+- This will test the server's ability to handle an invalid header field.

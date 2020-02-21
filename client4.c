@@ -36,12 +36,14 @@
 #include "helpers.c"
 
 #define CLIENT_ID "Client4"
-#define DESTINATION_ID "Client3"
+#define DESTINATION_ID "Client2"
 #define MESSAGE_ID 112  // Arbitrary
 
-int main() {
+int main(int argc, char* argv[]) {
+  int server_port;
+  sscanf(argv[1], "%d", &server_port);
   // Create socket
-  int socket_file_descriptor = connect_to_server();
+  int socket_file_descriptor = connect_to_server(server_port);
 
   // Start with hello.
   struct Message hello_message = get_hello_message(CLIENT_ID);

@@ -8,7 +8,6 @@
 #include <netinet/in.h>
 
 #define BUFSIZE 1024
-#define SERVER_PORT 9000
 #define SERVER_ID "Server"
 // Message max size is 2 + 20 + 20 + 4 + 4 + 400
 #define MESSAGE_MAX_SIZE 450
@@ -36,7 +35,7 @@ struct __attribute__((__packed__)) Message {
 /**
  * Connects to server. Returns socket file descriptor for connection.
  */
-int connect_to_server() {
+int connect_to_server(int port) {
   int socket_file_descriptor = socket(AF_INET,
                                       SOCK_STREAM,
                                       0);
@@ -51,7 +50,7 @@ int connect_to_server() {
   server_address.sin_addr.s_addr =
       htonl(INADDR_ANY); // Bind socket to available interfaces.
   server_address.sin_port =
-      htons((unsigned short) SERVER_PORT);
+      htons((unsigned short) port);
 
   // Connect to server
   if (connect(socket_file_descriptor,

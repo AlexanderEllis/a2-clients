@@ -28,9 +28,11 @@
 // Message max size is 2 + 20 + 20 + 4 + 4 + 400
 #define MESSAGE_MAX_SIZE 450
 
-int main() {
+int main(int argc, char* argv[]) {
+  int server_port;
+  sscanf(argv[1], "%d", &server_port);
   // Create socket
-  int socket_file_descriptor = connect_to_server();
+  int socket_file_descriptor = connect_to_server(server_port);
   int message_byte_size;
 
   // Start with hello.

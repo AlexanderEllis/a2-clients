@@ -12,7 +12,7 @@
  * Takes in the server's port as an arg.
  *
  * To use:
- * ./client 9010
+ * ./client1 9010
  *
  * To build:
  * gcc -g -o client1 client1.c
@@ -22,9 +22,11 @@
 
 #define CLIENT_ID "Client1"
 
-int main() {
+int main(int argc, char* argv[]) {
+  int server_port;
+  sscanf(argv[1], "%d", &server_port);
   // Create socket
-  int socket_file_descriptor = connect_to_server();
+  int socket_file_descriptor = connect_to_server(server_port);
 
   // Start with hello.
   struct Message hello_message = get_hello_message(CLIENT_ID);

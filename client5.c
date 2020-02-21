@@ -17,13 +17,15 @@
 
 #define CLIENT_ID "Client5"
 
-int main() {
+int main(int argc, char* argv[]) {
+  signal(SIGPIPE, SIG_IGN);
+  int server_port;
+  sscanf(argv[1], "%d", &server_port);
+  // Create socket
+  int socket_file_descriptor = connect_to_server(server_port);
   // Gotta set the sigpipe ignore setting so we can get -1 back from writes.
   // This will allow us to monitor when writes fail.
-  signal(SIGPIPE, SIG_IGN);
 
-  // Create socket
-  int socket_file_descriptor = connect_to_server();
 
   // Start with hello.
   struct Message hello_message = get_hello_message(CLIENT_ID);

@@ -3,7 +3,7 @@
  * Sends HELLO
  * Confirms it got a HELLO_ACK
  * Confirms it got a CLIENT_LIST
- * Sends CHAT to a predefined client id (see Client 3).
+ * Sends CHAT to a predefined client id (see Client 2).
  * EXITs.
  *
  * Takes in the server's port as an arg eventually.
@@ -21,9 +21,11 @@
 #define DESTINATION_ID "Client2"
 #define MESSAGE_ID 112  // Arbitrary
 
-int main() {
+int main(int argc, char* argv[]) {
+  int server_port;
+  sscanf(argv[1], "%d", &server_port);
   // Create socket
-  int socket_file_descriptor = connect_to_server();
+  int socket_file_descriptor = connect_to_server(server_port);
 
   // Start with hello.
   struct Message hello_message = get_hello_message(CLIENT_ID);

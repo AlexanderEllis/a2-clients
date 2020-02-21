@@ -27,8 +27,7 @@ Client 7: Client that sends HELLO, then CHAT to clientID that is not connected, 
 Client 8: Client that sends HELLO, then CHAT to itself, then reads the error message.
 - This will test the server's ability to gracefully handle a client sending a message to themself. As per the handout, the socket will be closed.
 
-TODO
-Client 9: Client that sends HELLO, then CHAT with data length that doesn't match length specified in header. It will then ensure that the connection was closed.
+Client 9: Client that sends HELLO, then CHAT with junk length (too long) specified in header. It will then ensure that the connection was closed.
 - This will test the server's ability to handle malformed data gracefully, since the server should close the connection.
 
 Client 10: Client that sends HELLO, then closes the connection without sending anything (very rude).

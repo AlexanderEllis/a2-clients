@@ -2,7 +2,7 @@
  * This is Client 5.
  *
  * Sends 1/2 of HELLO headers.
- * Sends second 1/2 of HELLO headers after 1 second.
+ * Sends second 1/2 of HELLO headers after 65 second.
  *
  * Takes in the server's port as an arg eventually.
  *
@@ -18,13 +18,13 @@
 #define CLIENT_ID "Client5"
 
 int main(int argc, char* argv[]) {
+  // Gotta set the sigpipe ignore setting so we can get -1 back from writes.
+  // This will allow us to monitor when writes fail on Mac.
   signal(SIGPIPE, SIG_IGN);
   int server_port;
   sscanf(argv[1], "%d", &server_port);
   // Create socket
   int socket_file_descriptor = connect_to_server(server_port);
-  // Gotta set the sigpipe ignore setting so we can get -1 back from writes.
-  // This will allow us to monitor when writes fail.
 
 
   // Start with hello.

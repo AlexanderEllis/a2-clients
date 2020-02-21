@@ -1,0 +1,17 @@
+# ignore everything
+*
+
+# don't ignore directories
+!*/
+
+# Ignore the separate git subdir
+*/split-client
+
+# Unignore any C things
+!*.c
+
+# Unignore all the READMEs and markdown
+!*.md
+
+# Unignore yours truly
+!.gitignore

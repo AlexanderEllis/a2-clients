@@ -32,3 +32,7 @@ Client 9: Client that sends HELLO, then CHAT with junk length (too long) specifi
 
 Client 10: Client that sends HELLO, then closes the connection without sending anything (very rude).
 - This will test the server's ability to handle a client randomly closing.
+
+Client 11: Client that sends HELLO, then impersonates Client3.
+- This will test impersonation.
+- Run both client2 and client3 before running this one.

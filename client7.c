@@ -40,15 +40,14 @@ int main(int argc, char* argv[]) {
   DEBUG_PRINT("Writing hello.\n");
   message_byte_size = write_message(socket_file_descriptor, &hello_message);
 
-  // Read from server. We should get a HELLO_ACK.
+  // Read from server. We should get a HELLO_ACK and CLIENT_LIST.
   struct Message hello_ack_message;
-  read_message(socket_file_descriptor, &hello_ack_message);
-  print_message(&hello_ack_message);
-
-  // Read from server. We should get a CLIENT_LIST.
-  struct Message client_list_message;
-  read_message(socket_file_descriptor, &client_list_message);
-  print_message(&client_list_message);
+  int bytes_read = read_message(socket_file_descriptor, &hello_ack_message);
+  if (bytes_read == 50) {
+    // We read hello ack and now have to read client list
+    struct Message client_list_message;
+    bytes_read = read_message(socket_file_descriptor, &client_list_message);
+  }
 
   // Let's chat it up, except we're sending to a junk destination.
   char * message_data = "Hey ASDFASDFASDF how you doing";

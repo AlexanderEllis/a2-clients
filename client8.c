@@ -68,9 +68,9 @@ int main(int argc, char* argv[]) {
   // Read from server. Server will have disconnected socket and removed from
   // lists (see assignment handout).
   struct Message message;
-  DEBUG_PRINT("Attempting to read error, but we'll get 0 bytes read.\n");
+  DEBUG_PRINT("Attempting to read error, but we'll get an error.\n");
   int bytes_read = read_message(socket_file_descriptor, &message);
-  assert(bytes_read == 0);
+  assert(bytes_read <= 0);
 
   // Loop until we kill program to ensure we're not closing this client's
   // connection.

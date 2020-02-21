@@ -7,11 +7,10 @@ All these clients share a ton of code in helpers.c. I put as much as I could in 
 Client 1: Client that sends HELLO, reads HELLO_ACK and CLIENT_LIST, sends CLIENT_LIST_REQ, reads client list, then sends EXIT
 - This is a normal client that just connects and reads the client list.
 
-Client 2: Client that sends HELLO, sends CHAT, then sends EXIT.
+Client 2: Client that sends HELLO, then reads messages forever.
+- This is super helpful client that just prints out whatever messages it gets. Run this while running all of the others to test whether messages are getting through.
 
-Client 3: Client that sends HELLO, reads message, then sends EXIT.
-- Can be used in coordination with client 2, if you run this one first.
-- Different client ID than the one before.
+Client 3: Client that sends HELLO to client2, sends CHAT, then sends EXIT.
 
 Client 4: Client that sends 1/2 of HELLO headers, then second half of HELLO headers. the 1/2 of CHAT, then second half of chat.
 - This will test the partial message for headers.
@@ -34,6 +33,3 @@ Client 9: Client that sends HELLO, then CHAT with data length that doesn't match
 
 Client 10: Client that sends HELLO, then closes the connection without sending anything (very rude).
 - This will test the server's ability to handle a client randomly closing.
-
-Client 11: Client that sends a junk HELLO (bad header fields)
-- This will test the server's ability to handle an invalid header field.

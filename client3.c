@@ -1,16 +1,15 @@
 /**
- * This is Client 2. It is a valid client and does the following in order:
+ * This is Client 3. It is a valid client and does the following in order:
  * Sends HELLO
  * Confirms it got a HELLO_ACK
  * Confirms it got a CLIENT_LIST
- * Waits for a chat
- *
- * (See README for more details on other clients)
+ * Sends CHAT to a predefined client id (see Client 3).
+ * EXITs.
  *
  * Takes in the server's port as an arg eventually.
  *
  * To use:
- * ./client3 9010
+ * ./client2 9010
  *
  * To build:
  * gcc -g -o client3 client3.c
@@ -19,6 +18,8 @@
 #include "helpers.c"
 
 #define CLIENT_ID "Client3"
+#define DESTINATION_ID "Client2"
+#define MESSAGE_ID 112  // Arbitrary
 
 int main() {
   // Create socket
@@ -27,7 +28,6 @@ int main() {
   // Start with hello.
   struct Message hello_message = get_hello_message(CLIENT_ID);
   DEBUG_PRINT("Writing hello.\n");
-  // Write to server.
   int message_byte_size = write_message(socket_file_descriptor, &hello_message);
 
   // Read from server. We should get a HELLO_ACK.
@@ -40,18 +40,17 @@ int main() {
   read_message(socket_file_descriptor, &client_list_message);
   print_message(&client_list_message);
 
-  // Loop forever
-  while(1) {
-    // Read from server. We should get a CHAT.
-    struct Message chat_message;
-    bzero(&chat_message, sizeof(chat_message));
-    int bytes_read = read_message(socket_file_descriptor, &chat_message);
-    if (bytes_read == 0) {
-      close(socket_file_descriptor);
-      return 0;
-    }
-    print_message(&chat_message);
-  }
+  // Let's chat it up. Send a message to client3.
+  char * message_data = "Hey Client3 how you doing";
+  struct Message chat_message =
+      get_chat_message(CLIENT_ID, DESTINATION_ID, message_data, MESSAGE_ID);
+  DEBUG_PRINT("Writing CHAT.\n");
+  message_byte_size = write_message(socket_file_descriptor, &chat_message);
+
+  // Send EXIT because we're done.
+  struct Message exit_message = get_exit_message(CLIENT_ID, SERVER_ID);
+  DEBUG_PRINT("Writing exit.\n");
+  message_byte_size = write_message(socket_file_descriptor, &exit_message);
 
   // Close the active socket.
   close(socket_file_descriptor);

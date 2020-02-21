@@ -15,7 +15,7 @@ Client 3: Client that sends HELLO to client2, sends CHAT, then sends EXIT.
 Client 4: Client that sends 1/2 of HELLO headers, then second half of HELLO headers. the 1/2 of CHAT, then second half of chat.
 - This will test the partial message for headers.
 
-Client 5: Client that sends HELLO, 1/2 of CHAT, waits 61 seconds, then ensures connection was closed.
+Client 5: Client that sends HELLO, 1/2 of CHAT, waits 65 seconds, then ensures connection was closed.
 - This will test the server's timeout when waiting for partial messages. After a minute the connection should be closed.
 
 Client 6: Client that sends HELLO, then tries to read, then just hangs out. Running one instance of this should succeed and print the hello_ack and clinet list. Running another instance without stopping the first one should print out the ERROR message it receives.

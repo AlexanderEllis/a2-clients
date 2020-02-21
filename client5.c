@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
   int message_byte_size =
       write_partial_message(socket_file_descriptor, &hello_message, 0, 25);
   DEBUG_PRINT("Bytes written in first write: %d\n", message_byte_size);
-  sleep(6);
+  sleep(65);
   message_byte_size =
       write_partial_message(socket_file_descriptor, &hello_message, 25, 25);
   DEBUG_PRINT("Bytes written in second write: %d\n", message_byte_size);
